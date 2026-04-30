@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+title: >-
+  mnemoverse-slod-paper: Code companion to "Semantic Level of Detail
+  for Knowledge Graphs"
+message: >-
+  If you use this software, please cite the accompanying paper.
+type: software
+authors:
+  - given-names: Edward
+    family-names: Izgorodin
+    email: izgorodin@me.com
+    orcid: 'https://orcid.org/0009-0006-2529-4393'
+    affiliation: Mnemoverse.AI
+repository-code: 'https://github.com/mnemoverse/mnemoverse-slod-paper'
+license: Apache-2.0
+preferred-citation:
+  type: article
+  authors:
+    - given-names: Edward
+      family-names: Izgorodin
+      email: izgorodin@me.com
+      orcid: 'https://orcid.org/0009-0006-2529-4393'
+      affiliation: Mnemoverse.AI
+  title: >-
+    Semantic Level of Detail for Knowledge Graphs: Discovering
+    Abstraction Boundaries via Spectral Heat Diffusion
+  year: 2026
+  url: 'https://arxiv.org/abs/2603.08965'
+  identifiers:
+    - type: other
+      value: 'arXiv:2603.08965'
+      description: arXiv preprint identifier
+keywords:
+  - knowledge graphs
+  - spectral graph theory
+  - community detection
+  - hyperbolic geometry
+  - heat kernel diffusion
+  - graph-based AI memory

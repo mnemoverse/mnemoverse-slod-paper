@@ -1,0 +1,27 @@
+mnemoverse-slod-paper
+Public companion to: arXiv:2603.08965 — "Semantic Level of Detail for
+Knowledge Graphs: Discovering Abstraction Boundaries via Spectral Heat Diffusion"
+
+Copyright 2026 Edward Izgorodin / Mnemoverse.AI.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+================================================================================
+Patent Notice
+================================================================================
+The methods implemented in this repository are the subject of provisional
+patent application INPI 20262007760519 (filed 2026-03-03, INPI Portugal,
+"System and Method for Multi-Scale Semantic Representation via Heat Kernel
+Diffusion on Riemannian Manifolds"). The Apache License 2.0 grants an
+explicit, irrevocable patent license for the released implementation only;
+patent rights are retained for other implementations and embodiments.

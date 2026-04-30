@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "slod"
+version = "1.0.0"
+description = "Public companion code for arXiv:2603.08965 — Semantic Level of Detail for Knowledge Graphs"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [
+  { name = "Edward Izgorodin", email = "izgorodin@me.com" },
+]
+keywords = [
+  "knowledge graphs", "spectral graph theory", "community detection",
+  "hyperbolic geometry", "heat kernel diffusion", "graph-based AI memory",
+]
+classifiers = [
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  "numpy>=1.26",
+  "scipy>=1.12",
+  "matplotlib>=3.8",
+  "networkx>=3.2",
+  "scikit-learn>=1.4",
+  "geoopt>=0.5",
+  "torch>=2.2",
+  "nltk>=3.8",
+  "tqdm>=4.66",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.4",
+  "pytest-cov>=4.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/mnemoverse/mnemoverse-slod-paper"
+Paper = "https://arxiv.org/abs/2603.08965"
+Issues = "https://github.com/mnemoverse/mnemoverse-slod-paper/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["slod*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+addopts = "-q"
