@@ -1,6 +1,7 @@
 # Semantic Level of Detail for Knowledge Graphs
 
 [![arXiv](https://img.shields.io/badge/arXiv-2603.08965-b31b1b.svg)](https://arxiv.org/abs/2603.08965)
+[![DOI](https://zenodo.org/badge/1226039587.svg)](https://doi.org/10.5281/zenodo.19933482)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 

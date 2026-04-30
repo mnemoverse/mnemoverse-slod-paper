@@ -13,6 +13,13 @@ authors:
     affiliation: Mnemoverse.AI
 repository-code: 'https://github.com/mnemoverse/mnemoverse-slod-paper'
 license: Apache-2.0
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.19933482
+    description: Concept DOI (always points to the latest release)
+  - type: doi
+    value: 10.5281/zenodo.19933483
+    description: Version DOI for v1.0.0
 preferred-citation:
   type: article
   authors:
@@ -30,6 +37,9 @@ preferred-citation:
     - type: other
       value: 'arXiv:2603.08965'
       description: arXiv preprint identifier
+    - type: doi
+      value: 10.5281/zenodo.19933482
+      description: Companion code DOI (concept; always latest)
 keywords:
   - knowledge graphs
   - spectral graph theory
