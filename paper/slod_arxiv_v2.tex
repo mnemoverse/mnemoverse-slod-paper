@@ -95,7 +95,7 @@ We draw inspiration from computer graphics, where \emph{Level of Detail} (LOD) a
 
 Our key insight is that hyperbolic space provides the natural substrate. The Poincar\'{e} ball $\BB$ embeds tree-structured hierarchies with distortion $(1{+}\varepsilon)$ for any $\varepsilon > 0$ \cite{sarkar2011low}, while heat kernel diffusion on the graph Laplacian provides a family of smoothing operators parameterized by a continuous scale $\sigma$. Spectral gaps in the Laplacian then induce \emph{emergent scale boundaries}---values of $\sigma$ where the representation undergoes qualitative transitions---connecting SLoD to multi-scale community detection \cite{delvenne2010stability}.
 
-\paragraph{Contributions.} \textbf{(1)}~A mathematical formulation of Semantic LOD as heat kernel diffusion on the Poincar\'{e} ball; \textbf{(2)}~Theoretical guarantees on hierarchical coherence and approximation quality; \textbf{(3)}~An efficient tangent-space aggregation algorithm; \textbf{(4)}~An emergent scale selection procedure tied to spectral structure; \textbf{(5)}~Empirical validation on synthetic hierarchies (HSBM) and a real-world DAG (WordNet, 82K synsets).\footnote{Code and experiment artefacts: \url{https://github.com/mnemoverse/mnemoverse-slod-paper}}
+\paragraph{Contributions.} \textbf{(1)}~A mathematical formulation of Semantic LOD as heat kernel diffusion on the Poincar\'{e} ball; \textbf{(2)}~Theoretical guarantees on hierarchical coherence and approximation quality; \textbf{(3)}~An efficient tangent-space aggregation algorithm; \textbf{(4)}~An emergent scale selection procedure tied to spectral structure; \textbf{(5)}~Empirical validation on synthetic hierarchies (HSBM) and a real-world DAG (WordNet, 82K synsets).\footnote{Code and experiment artefacts: \url{https://github.com/mnemoverse/mnemoverse-slod-paper}; permanent archive: \url{https://doi.org/10.5281/zenodo.19933482}}
 
 %=============================================
 \section{Background}\label{sec:prelim}
@@ -438,7 +438,7 @@ Several directions merit investigation.
 %=============================================
 \section*{Acknowledgments and Disclosures}
 
-The author thanks the two anonymous GRAAI~2026 reviewers for constructive comments that materially improved \S\ref{sec:method} (hyperbolic positioning), \S\ref{sec:ablation} (statistical methodology), and \S\ref{sec:related} (Markov Stability differentiation). The author is a founder of Mnemoverse.AI; this work is part of the company's research program on graph-based AI memory systems. The manuscript was drafted with assistance from large language models; all methodology, experiments, claims, and responsibility for content are the author's. Source code and reproducibility scripts: \url{https://github.com/mnemoverse/mnemoverse-slod-paper}.
+The author thanks the two anonymous GRAAI~2026 reviewers for constructive comments that materially improved \S\ref{sec:method} (hyperbolic positioning), \S\ref{sec:ablation} (statistical methodology), and \S\ref{sec:related} (Markov Stability differentiation). The author is a founder of Mnemoverse.AI; this work is part of the company's research program on graph-based AI memory systems. The manuscript was drafted with assistance from large language models; all methodology, experiments, claims, and responsibility for content are the author's. Source code and reproducibility scripts: \url{https://github.com/mnemoverse/mnemoverse-slod-paper} (archived at \url{https://doi.org/10.5281/zenodo.19933482}).
 
 %=============================================
 \appendix
