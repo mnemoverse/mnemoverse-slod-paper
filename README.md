@@ -9,6 +9,18 @@ Public code companion to **arXiv:2603.08965** — Edward Izgorodin (Mnemoverse.A
 *Semantic Level of Detail for Knowledge Graphs: Discovering Abstraction Boundaries
 via Spectral Heat Diffusion* (extended preprint, 2026).
 
+## Workshop acceptance and program
+
+Accepted as a discussion paper at the 1st Workshop on Graphs Across AI
+(GRAAI), IEEE WCCI 2026. The official program scheduled the paper for:
+
+- **Date and time:** Friday, 26 June 2026, 15:15-15:30 CEST
+- **Location:** MECC Maastricht, room 2.18 Mekong
+- **Scheduled presenter:** Edward Izgorodin
+- **Workshop:** [Graphs Across AI](https://graph-across-ai.dii.univpm.it/)
+
+The scheduled presentation did not take place.
+
 ## Cite
 
 ```bibtex
@@ -156,7 +168,8 @@ licensing inquiries, please contact the author directly.
 
 ## Acknowledgements
 
-This is a discussion paper presented at the 1st Workshop on Graphs Across
-AI (GRAAI), IEEE WCCI 2026, Maastricht. Thanks to the two anonymous GRAAI
-reviewers and to several rounds of pre-submission adversarial review that
-materially improved the manuscript.
+This discussion paper was accepted at the 1st Workshop on Graphs Across AI
+(GRAAI), IEEE WCCI 2026, Maastricht, and scheduled in the 26 June 2026
+program, but the presentation did not take place. Thanks to the two anonymous
+GRAAI reviewers and to several rounds of pre-submission adversarial review
+that materially improved the manuscript.
