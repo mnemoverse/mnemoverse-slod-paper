@@ -110,6 +110,26 @@ class TestBuildKnnGraphBatched:
                 f"Weight mismatch at ({i},{j}): {w_orig} vs {w_batch}"
             )
 
+    def test_agrees_with_original_under_default_tau(self):
+        """Weights must agree when tau is left to its default, not only when pinned.
+
+        The test above passes ``tau=1.0`` to both functions, which bypasses the
+        default-bandwidth code entirely. Under defaults the reference takes the
+        median over the *symmetrised* edge set while the batched path took it over
+        the *directed* top-k distances; on real 1017-point embeddings the topology
+        matched exactly but weights differed by 3.6e-2 (found 2026-09-04).
+        """
+        rng = np.random.RandomState(7)
+        pts = rng.randn(60, 4)
+        pts = pts / np.linalg.norm(pts, axis=1, keepdims=True) * rng.uniform(0.05, 0.85, (60, 1))
+        adj_orig = build_knn_graph(pts, k=7).tocsr()
+        adj_batch = build_knn_graph_batched(pts, k=7, batch_size=16).tocsr()
+        adj_orig.sort_indices()
+        adj_batch.sort_indices()
+        assert np.array_equal(adj_orig.indptr, adj_batch.indptr)
+        assert np.array_equal(adj_orig.indices, adj_batch.indices)
+        np.testing.assert_allclose(adj_batch.data, adj_orig.data, rtol=0, atol=1e-12)
+
     def test_single_node(self):
         """Single node: empty graph."""
         pts = np.array([[0.1, 0.2]])
@@ -155,6 +175,25 @@ class TestBuildKnnGraphApprox:
         approx_edges = set(zip(*adj_approx.nonzero()))
         overlap = len(exact_edges & approx_edges) / max(len(exact_edges), 1)
         assert overlap >= 0.80, f"Only {overlap:.0%} edge overlap with exact kNN"
+
+    def test_agrees_with_original_under_default_tau_when_exact(self):
+        """With enough oversampling the candidate set is every other point, so the
+        approximate builder must reproduce ``build_knn_graph`` exactly — including
+        the default bandwidth, which the test above pins with ``tau=1.0``. It
+        previously took the median over the directed top-k distances rather than
+        the symmetrised edge set (found 2026-09-04); this is the path Exp 2 ran
+        on the full WordNet graph.
+        """
+        rng = np.random.RandomState(11)
+        pts = rng.randn(40, 3)
+        pts = pts / np.linalg.norm(pts, axis=1, keepdims=True) * rng.uniform(0.05, 0.85, (40, 1))
+        adj_orig = build_knn_graph(pts, k=6).tocsr()
+        adj_approx = build_knn_graph_approx(pts, k=6, oversampling=40, verbose=False).tocsr()
+        adj_orig.sort_indices()
+        adj_approx.sort_indices()
+        assert np.array_equal(adj_orig.indptr, adj_approx.indptr)
+        assert np.array_equal(adj_orig.indices, adj_approx.indices)
+        np.testing.assert_allclose(adj_approx.data, adj_orig.data, rtol=0, atol=1e-12)
 
     def test_single_node(self):
         """Single node: empty graph."""
