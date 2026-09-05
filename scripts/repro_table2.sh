@@ -18,7 +18,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 echo "== Tier C: WordNet Kendall τ reproduction =="
-echo "This takes about 15 minutes on a modern CPU."
+echo "This takes about 15 minutes on an 8-thread x86 CPU (measured 2026-09-05); no GPU is used."
 echo ""
 
 echo "Step 1: ensure NLTK WordNet corpus is available ..."
