@@ -128,13 +128,15 @@ tests/                     pytest unit tests for the public package
 
 All paper numbers were measured single-threaded on an Apple M-series CPU
 with 16 GB RAM (see §5 of the paper). Lanczos partial eigendecomposition
-is the dominant cost for fixed `K_eigs`; wall-clock scales as `N^{0.77}`
-across 978–15,771 nodes.
+wall-clock scales as `N^{0.77}` across 978–15,771 nodes, but it is not the
+dominant cost at these sizes: the Poincaré embedding and BoundaryScan are.
 
 - HSBM 1024 nodes, `K_eigs`=80 — 25–30 s per *r* value
 - HSBM 1024 nodes, full ablation (8 configs × 7 *r* × 50 seeds) — 6–12 h on 24 cores
-- WordNet 82,115 synsets — Lanczos eigendecomposition ~5 min, BoundaryScan
-  on 100 stratified leaf foci ~10 min
+- WordNet 82,115 synsets — Poincaré embedding (300 epochs) ~1 min, kNN graph
+  ~1 min, Lanczos eigendecomposition (`K_eigs`=50) ~5 s, BoundaryScan on 100
+  stratified leaf foci ~10 min; about 15 min end to end (measured 2026-09-05,
+  x86, 8 threads; the earlier "~5 min" for the eigendecomposition was wrong)
 
 ## Results table (paper Table 4 highlights)
 
