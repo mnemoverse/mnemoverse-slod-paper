@@ -62,6 +62,14 @@ class TestBuildKnnGraph:
         assert adj.shape == (1, 1)
         assert adj.nnz == 0
 
+    def test_k_zero_gives_empty_graph(self):
+        """k=0 is an empty graph, not an exception — all three builders must agree."""
+        rng = np.random.RandomState(3)
+        pts = rng.randn(12, 2) * 0.3
+        adj = build_knn_graph(pts, k=0)
+        assert adj.shape == (12, 12)
+        assert adj.nnz == 0
+
 
 class TestBuildKnnGraphBatched:
     """Test batched kNN graph construction."""
@@ -137,6 +145,14 @@ class TestBuildKnnGraphBatched:
         assert adj.shape == (1, 1)
         assert adj.nnz == 0
 
+    def test_k_zero_gives_empty_graph(self):
+        """k=0 is an empty graph, not a zero-step range error (CodeRabbit on #4)."""
+        rng = np.random.RandomState(3)
+        pts = rng.randn(12, 2) * 0.3
+        adj = build_knn_graph_batched(pts, k=0, batch_size=4)
+        assert adj.shape == (12, 12)
+        assert adj.nnz == 0
+
 
 class TestBuildKnnGraphApprox:
     """Test approximate kNN graph construction."""
@@ -200,6 +216,14 @@ class TestBuildKnnGraphApprox:
         pts = np.array([[0.1, 0.2]])
         adj = build_knn_graph_approx(pts)
         assert adj.shape == (1, 1)
+        assert adj.nnz == 0
+
+    def test_k_zero_gives_empty_graph(self):
+        """k=0 is an empty graph, not a zero-step range error (CodeRabbit on #4)."""
+        rng = np.random.RandomState(3)
+        pts = rng.randn(12, 2) * 0.3
+        adj = build_knn_graph_approx(pts, k=0, verbose=False)
+        assert adj.shape == (12, 12)
         assert adj.nnz == 0
 
 

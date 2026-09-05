@@ -161,6 +161,7 @@ def _gaussian_weights_over_symmetrised_edges(
     upper = edge_rows < edge_cols
     up_rows, up_cols = edge_rows[upper], edge_cols[upper]
     up_dists = np.empty(len(up_rows), dtype=np.float64)
+    edge_batch = max(edge_batch, 1)  # k = 0 gives an empty graph, not a zero range step
     with torch.no_grad():
         for start in range(0, len(up_rows), edge_batch):
             end = min(start + edge_batch, len(up_rows))
