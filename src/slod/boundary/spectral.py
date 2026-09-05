@@ -157,6 +157,11 @@ def _gaussian_weights_over_symmetrised_edges(
     n_edges = len(edge_rows)
     if verbose and n > 5000:
         print(f"    Symmetrized: {n_edges} edges, computing weights...")
+    if n_edges == 0:
+        # k = 0 or a degenerate input: an empty graph, exactly as build_knn_graph returns.
+        # Return before any sparse indexing — scipy's fancy indexing with two empty index
+        # arrays does not behave like an empty selection.
+        return edge_rows, edge_cols, np.empty(0, dtype=np.float64)
 
     upper = edge_rows < edge_cols
     up_rows, up_cols = edge_rows[upper], edge_cols[upper]
