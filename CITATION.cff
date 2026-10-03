@@ -8,7 +8,7 @@ type: software
 authors:
   - given-names: Edward
     family-names: Izgorodin
-    email: izgorodin@me.com
+    email: edward@mnemoverse.ai
     orcid: 'https://orcid.org/0009-0006-2529-4393'
     affiliation: Mnemoverse.AI
 repository-code: 'https://github.com/mnemoverse/mnemoverse-slod-paper'
@@ -25,7 +25,7 @@ preferred-citation:
   authors:
     - given-names: Edward
       family-names: Izgorodin
-      email: izgorodin@me.com
+      email: edward@mnemoverse.ai
       orcid: 'https://orcid.org/0009-0006-2529-4393'
       affiliation: Mnemoverse.AI
   title: >-

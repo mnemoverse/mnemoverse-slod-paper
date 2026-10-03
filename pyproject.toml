@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
 authors = [
-  { name = "Edward Izgorodin", email = "izgorodin@me.com" },
+  { name = "Edward Izgorodin", email = "edward@mnemoverse.ai" },
 ]
 keywords = [
   "knowledge graphs", "spectral graph theory", "community detection",

@@ -161,7 +161,7 @@ patent rights are retained for other implementations.
 
 ## Contact
 
-Edward Izgorodin — `izgorodin@me.com` — [@izgorodin](https://github.com/izgorodin) — Mnemoverse.AI, Funchal, Madeira, Portugal.
+Edward Izgorodin — `edward@mnemoverse.ai` — [@izgorodin](https://github.com/izgorodin) — Mnemoverse.AI, Funchal, Madeira, Portugal.
 
 For paper questions, open a GitHub issue or email. For commercial
 licensing inquiries, please contact the author directly.
