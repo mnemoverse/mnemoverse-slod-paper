@@ -66,4 +66,4 @@ Apache-2.0 grant.
 ## Contact
 
 For paper questions or commercial-licensing inquiries, contact the author:
-**Edward Izgorodin** — `izgorodin@me.com` — [Mnemoverse.AI](https://mnemoverse.com).
+**Edward Izgorodin** — `edward@mnemoverse.ai` — [Mnemoverse.AI](https://mnemoverse.com).
