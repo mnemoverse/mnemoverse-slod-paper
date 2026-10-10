@@ -62,7 +62,7 @@ Three tiers, by time budget:
 | **B — main paper figures (~30 min)** | `bash scripts/repro_table1.sh` | Table 1 (HSBM macro/meso/micro ARI, single seed=42) + Figure 2 (K*(σ) trajectory) | ~25 min | M-series CPU or x86 |
 | **B** | `bash scripts/repro_figures.sh` | Figures 3, 5, 6 (phase-transition, ablation profiles, scaling) from cached JSONs | ~10s | any |
 | **C — full ablation (hours)** | `bash scripts/repro_tables_3_4.sh` | Tables 3+4 (50-seed BCa CIs, Poincaré + 7 ablation configs × 7 *r* values = 2800 runs) | 6–12h | 24-core preferred |
-| **C** | `bash scripts/repro_table2.sh` | WordNet Kendall τ (downloads NLTK WordNet + Nickel-Kiela embedding) | 1–2h | helpful: GPU |
+| **C** | `bash scripts/repro_table2.sh` | WordNet Kendall τ (downloads NLTK WordNet + Nickel-Kiela embedding) | ~15 min | CPU only (8-thread x86 measured); no GPU path |
 
 After Tier B + cached JSONs in `results/exp1/`, all six figures and Tables 1, 3, 4 in
 the paper PDF can be regenerated. Tier C is for full BCa CIs from scratch.
@@ -128,13 +128,15 @@ tests/                     pytest unit tests for the public package
 
 All paper numbers were measured single-threaded on an Apple M-series CPU
 with 16 GB RAM (see §5 of the paper). Lanczos partial eigendecomposition
-is the dominant cost for fixed `K_eigs`; wall-clock scales as `N^{0.77}`
-across 978–15,771 nodes.
+wall-clock scales as `N^{0.77}` across 978–15,771 nodes, but it is not the
+dominant cost at these sizes: the Poincaré embedding and BoundaryScan are.
 
 - HSBM 1024 nodes, `K_eigs`=80 — 25–30 s per *r* value
 - HSBM 1024 nodes, full ablation (8 configs × 7 *r* × 50 seeds) — 6–12 h on 24 cores
-- WordNet 82,115 synsets — Lanczos eigendecomposition ~5 min, BoundaryScan
-  on 100 stratified leaf foci ~10 min
+- WordNet 82,115 synsets — Poincaré embedding (300 epochs) ~1 min, kNN graph
+  ~1 min, Lanczos eigendecomposition (`K_eigs`=50) ~5 s, BoundaryScan on 100
+  stratified leaf foci ~10 min; about 15 min end to end (measured 2026-09-05,
+  x86, 8 threads; the earlier "~5 min" for the eigendecomposition was wrong)
 
 ## Results table (paper Table 4 highlights)
 

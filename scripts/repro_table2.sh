@@ -3,8 +3,10 @@
 # between detected boundary scales σ* and true ancestor depth on 100
 # stratified leaf foci).
 #
-# Runtime: ~1-2 hours single-threaded. Lanczos eigendecomposition on the 82K
-# Laplacian dominates. GPU helps marginally (geoopt operations); CPU works.
+# Runtime: about 15 minutes (measured 2026-09-05, x86, 8 threads): Poincaré
+# embedding ~1 min, kNN graph ~1 min, Lanczos eigendecomposition ~5 s,
+# BoundaryScan on 100 foci ~10 min. BoundaryScan dominates, not Lanczos.
+# CPU only: the Exp 2 code path never selects a CUDA device.
 #
 # Required external data:
 #   - NLTK WordNet corpus (downloaded automatically via nltk.download).
@@ -16,7 +18,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 echo "== Tier C: WordNet Kendall τ reproduction =="
-echo "This will take 1-2 hours."
+echo "This takes about 15 minutes on an 8-thread x86 CPU (measured 2026-09-05); no GPU is used."
 echo ""
 
 echo "Step 1: ensure NLTK WordNet corpus is available ..."
