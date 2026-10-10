@@ -44,8 +44,15 @@ def _poincare_distance_matrix(points: np.ndarray, row_batch: int = 512) -> np.nd
         for start in range(0, n, row_batch):
             end = min(start + row_batch, n)
             full[start:end] = ball.dist(pts_t[start:end].unsqueeze(1), pts_t.unsqueeze(0)).numpy()
-    upper = np.triu(full, k=1)
-    return upper + upper.T
+    # Mirror the strict upper triangle in place. ``np.triu(full, 1)`` followed by
+    # ``upper + upper.T`` would hold three dense n×n matrices at once (~2.4 GB at
+    # N = 10 000); the row-wise copy allocates nothing and yields the same bits:
+    # every lower entry (i, j), j < i, receives the upper entry (j, i), which is
+    # the single d(x_j, x_i) the former loop assigned to both positions.
+    np.fill_diagonal(full, 0.0)
+    for i in range(1, n):
+        full[i, :i] = full[:i, i]
+    return full
 
 
 def build_knn_graph(
