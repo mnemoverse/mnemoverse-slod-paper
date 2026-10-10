@@ -122,6 +122,68 @@ def build_knn_graph(
     return scipy.sparse.csr_matrix(adjacency)
 
 
+def _gaussian_weights_over_symmetrised_edges(
+    ball: geoopt.PoincareBall,
+    pts_t: torch.Tensor,
+    sym_mask: scipy.sparse.csr_matrix,
+    *,
+    tau: float | None,
+    edge_batch: int,
+    verbose: bool,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Exact Poincaré distance for every symmetrised edge, then Gaussian weights.
+
+    Shared by ``build_knn_graph_batched`` and ``build_knn_graph_approx`` so the
+    two cannot drift apart again. When ``tau`` is None it defaults to the median
+    distance over the symmetrised edge set, both directions — the population
+    ``build_knn_graph`` uses (``dist_matrix[symmetric_mask]``) and the one the
+    paper states ("median pairwise distance in the kNN graph"). Both callers
+    previously took the median over the *directed* top-k distances instead.
+    Symmetrisation only ever adds edges, and the ones it adds are the longer
+    ones a node did not pick itself, so that median was systematically too
+    small: on real 1017-point embeddings the topology matched
+    ``build_knn_graph`` exactly while every weight was off by up to 3.6e-2
+    (found 2026-09-04).
+
+    Each undirected edge is evaluated once (row < col) and mirrored, so both
+    directions carry the identical value exactly as a dense symmetric distance
+    matrix would, rather than trusting d(x, y) == d(y, x) to the last bit.
+
+    Returns ``(edge_rows, edge_cols, weights)`` in COO order.
+    """
+    n = sym_mask.shape[0]
+    sym_coo = sym_mask.tocoo()
+    edge_rows, edge_cols = sym_coo.row, sym_coo.col
+    n_edges = len(edge_rows)
+    if verbose and n > 5000:
+        print(f"    Symmetrized: {n_edges} edges, computing weights...")
+    if n_edges == 0:
+        # k = 0 or a degenerate input: an empty graph, exactly as build_knn_graph returns.
+        # Return before any sparse indexing — scipy's fancy indexing with two empty index
+        # arrays does not behave like an empty selection.
+        return edge_rows, edge_cols, np.empty(0, dtype=np.float64)
+
+    upper = edge_rows < edge_cols
+    up_rows, up_cols = edge_rows[upper], edge_cols[upper]
+    up_dists = np.empty(len(up_rows), dtype=np.float64)
+    edge_batch = max(edge_batch, 1)  # k = 0 gives an empty graph, not a zero range step
+    with torch.no_grad():
+        for start in range(0, len(up_rows), edge_batch):
+            end = min(start + edge_batch, len(up_rows))
+            up_dists[start:end] = ball.dist(
+                pts_t[up_rows[start:end]], pts_t[up_cols[start:end]]
+            ).numpy()
+    lookup = scipy.sparse.coo_matrix((up_dists, (up_rows, up_cols)), shape=(n, n)).tocsr()
+    lookup = lookup + lookup.T
+    edge_dists = np.asarray(lookup[edge_rows, edge_cols]).ravel()
+
+    if tau is None:
+        tau = float(np.median(edge_dists)) if n_edges > 0 else 1.0
+    tau = max(tau, 1e-10)
+    weights = np.exp(-edge_dists**2 / (2 * tau**2))
+    return edge_rows, edge_cols, weights
+
+
 def build_knn_graph_batched(
     points: np.ndarray,
     k: int | None = None,
@@ -131,14 +193,18 @@ def build_knn_graph_batched(
 ) -> scipy.sparse.csr_matrix:
     """Build a weighted symmetric kNN graph using vectorized Poincare distance.
 
-    Same semantics as ``build_knn_graph`` but computes pairwise distances in
-    batched matrix operations via geoopt tensors.  Memory usage is
-    O(batch_size * N) instead of O(N^2), making this suitable for N > 5000.
+    Same edge set and same default bandwidth as ``build_knn_graph(metric="poincare")``
+    — ``tau`` defaults to the median distance over the *symmetrised* edge set in
+    both functions — with weights agreeing to floating-point round-off. The
+    difference is memory: O(batch_size * N) instead of the dense O(N^2) distance
+    matrix, which is what makes this usable for N > 5000. Poincaré metric only;
+    there is no Euclidean variant of this function.
 
     Args:
         points: Array of shape (N, d), each row a point in B^d.
         k: Number of neighbors. Default: max(10, min(int(sqrt(N)), 50)).
-        tau: Bandwidth for Gaussian weights. Default: median kNN distance.
+        tau: Bandwidth for Gaussian weights. Default: median distance over the
+            symmetrised kNN edge set (identical to ``build_knn_graph``).
         batch_size: Number of rows to process at once (controls peak memory).
 
     Returns:
@@ -157,7 +223,6 @@ def build_knn_graph_batched(
 
     # --- Phase 1: batched kNN indices ---
     knn_indices = np.empty((n, k), dtype=np.int64)
-    knn_dists = np.empty((n, k), dtype=np.float64)
     n_batches = (n + batch_size - 1) // batch_size
 
     for bi, start in enumerate(range(0, n, batch_size)):
@@ -169,9 +234,8 @@ def build_knn_graph_batched(
         # Set self-distance to inf so it's never selected as a neighbor
         for i in range(end - start):
             dists[i, start + i] = float("inf")
-        topk_dists, topk_idx = torch.topk(dists, k, dim=1, largest=False)
+        _, topk_idx = torch.topk(dists, k, dim=1, largest=False)
         knn_indices[start:end] = topk_idx.numpy()
-        knn_dists[start:end] = topk_dists.numpy()
         if verbose and n > 5000 and (bi % max(1, n_batches // 5) == 0 or bi == n_batches - 1):
             print(f"    kNN batch {bi+1}/{n_batches} ({end}/{n} nodes)")
 
@@ -195,27 +259,10 @@ def build_knn_graph_batched(
         shape=(n, n),
     ).tocsr()
 
-    # --- Phase 3: compute tau from kNN distances if not provided ---
-    if tau is None:
-        tau = float(np.median(knn_dists))
-    tau = max(tau, 1e-10)
-
-    # --- Phase 4: compute weights for all symmetric edges ---
-    sym_coo = sym_mask.tocoo()
-    edge_rows = sym_coo.row
-    edge_cols = sym_coo.col
-    n_edges_total = len(edge_rows)
-    if verbose and n > 5000:
-        print(f"    Symmetrized: {n_edges_total} edges, computing weights...")
-
-    # Compute distances for edges in batches
-    weights = np.empty(n_edges_total, dtype=np.float64)
-    for start in range(0, n_edges_total, batch_size * k):
-        end = min(start + batch_size * k, n_edges_total)
-        r_batch = edge_rows[start:end]
-        c_batch = edge_cols[start:end]
-        d = ball.dist(pts_t[r_batch], pts_t[c_batch]).numpy()
-        weights[start:end] = np.exp(-d**2 / (2 * tau**2))
+    # --- Phase 3: bandwidth + weights over the symmetrised edge set ---
+    edge_rows, edge_cols, weights = _gaussian_weights_over_symmetrised_edges(
+        ball, pts_t, sym_mask, tau=tau, edge_batch=batch_size * k, verbose=verbose
+    )
 
     adjacency = scipy.sparse.csr_matrix(
         (weights, (edge_rows, edge_cols)), shape=(n, n)
@@ -246,7 +293,8 @@ def build_knn_graph_approx(
     Args:
         points: Array of shape (N, d), each row a point in B^d.
         k: Number of neighbors. Default: max(10, min(int(sqrt(N)), 50)).
-        tau: Bandwidth for Gaussian weights. Default: median kNN distance.
+        tau: Bandwidth for Gaussian weights. Default: median distance over the
+            symmetrised kNN edge set (identical to ``build_knn_graph``).
         oversampling: Candidate multiplier for tangent-space search.
         batch_size: Batch size for exact distance refinement.
 
@@ -289,7 +337,6 @@ def build_knn_graph_approx(
     pts_t = torch.as_tensor(points, dtype=torch.float64)
 
     knn_indices = np.empty((n, k), dtype=np.int64)
-    knn_dists = np.empty((n, k), dtype=np.float64)
 
     for start in range(0, n, batch_size):
         end = min(start + batch_size, n)
@@ -304,7 +351,6 @@ def build_knn_graph_approx(
             # Keep top-k by exact distance
             top_k_local = np.argsort(d)[:k]
             knn_indices[node_idx] = cands[top_k_local]
-            knn_dists[node_idx] = d[top_k_local]
 
     if verbose and n > 5000:
         print(f"    Exact refinement done ({n} nodes × {k_search} candidates → top-{k})")
@@ -321,26 +367,10 @@ def build_knn_graph_approx(
         shape=(n, n),
     ).tocsr()
 
-    # --- Phase 5: tau + weights ---
-    if tau is None:
-        tau = float(np.median(knn_dists))
-    tau = max(tau, 1e-10)
-
-    sym_coo = sym_mask.tocoo()
-    edge_rows = sym_coo.row
-    edge_cols = sym_coo.col
-    n_edges_total = len(edge_rows)
-    if verbose and n > 5000:
-        print(f"    Symmetrized: {n_edges_total} edges, computing weights...")
-
-    weights = np.empty(n_edges_total, dtype=np.float64)
-    edge_batch = batch_size * k
-    for start in range(0, n_edges_total, edge_batch):
-        end = min(start + edge_batch, n_edges_total)
-        r_batch = edge_rows[start:end]
-        c_batch = edge_cols[start:end]
-        d = ball.dist(pts_t[r_batch], pts_t[c_batch]).detach().numpy()
-        weights[start:end] = np.exp(-d**2 / (2 * tau**2))
+    # --- Phase 5: bandwidth + weights over the symmetrised edge set ---
+    edge_rows, edge_cols, weights = _gaussian_weights_over_symmetrised_edges(
+        ball, pts_t, sym_mask, tau=tau, edge_batch=batch_size * k, verbose=verbose
+    )
 
     adjacency = scipy.sparse.csr_matrix(
         (weights, (edge_rows, edge_cols)), shape=(n, n)
